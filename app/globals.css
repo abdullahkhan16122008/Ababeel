@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 
+* {
+  font-family: "Lora", serif;
+  font-style: normal;
+}
+
 
 /* Marck Script */
 .ababeelFont {
