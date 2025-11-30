@@ -28,6 +28,7 @@ const Login = () => {
                     localStorage.setItem('id', res.data.user.id);
                     localStorage.setItem('username', res.data.user.username);
                     localStorage.setItem('profilePicture', res.data.user.profilePicture);
+                    router.push('/');
                 }
             } else {
                 alert('Internal Server Issue')

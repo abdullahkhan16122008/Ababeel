@@ -1,9 +1,13 @@
+"use client";
 import Image from "next/image";
+import HomePage from "./components/home/Home";
+import Sidebar from "./components/globalComponents/Sidebar";
 
 export default function Home() {
   return (
     <>
-    home page
+    <Sidebar page="Home" />
+    <HomePage />
     </>
   );
 }

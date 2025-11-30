@@ -148,6 +148,9 @@ const Profile = () => {
 
   };
 
+  let username = localStorage.getItem('username');
+
+
   return (
     <>
       <section className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white">
@@ -170,9 +173,11 @@ const Profile = () => {
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row items-center gap-4">
                 <h2 className="text-2xl font-light">{userData?.username}</h2>
-                <button onClick={() => setEditProfile(true)} className="px-6 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-700">
+                {username === userData?.username ? <button onClick={() => setEditProfile(true)} className="px-6 py-2 bg-gray-200 dark:bg-gray-800 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-700">
                   Edit Profile
-                </button>
+                </button> : <button className="px-6 py-2 bg-[#2A3B8F] hover:bg-[#3CB7C4] rounded-lg font-medium text-white">
+                  Follow
+                </button> }
               </div>
               <div className="mt-6 flex gap-10 justify-center md:justify-start text-lg">
                 <div><strong>{postsData.length}</strong> posts</div>

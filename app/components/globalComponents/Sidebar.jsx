@@ -3,31 +3,33 @@
 
 import React, { use } from 'react';
 import { Home, Search, Compass, Video, MessageSquare, Bell, PlusSquare, User, Menu } from "lucide-react";
-import { useAppContext } from '../../ContextApi/Context';
+// import { useAppContext } from '../../ContextApi/Context.js';
+import Link from 'next/link';
 
 
 const Sidebar = ({ page }) => {
-  const { theme } = useAppContext(); // theme ko use kar rahe hain
-  let [isDark, setIsDark] = React.useState(false);
+  // const { theme } = useAppContext(); // theme ko use kar rahe hain
+  // let [isDark, setIsDark] = React.useState(false);
+  let username = localStorage.getItem('username');
 
   const menu = [
-    { icon: <Home size={26} />, label: "Home", active: true },
-    { icon: <Search size={26} />, label: "Search" },
-    { icon: <Compass size={26} />, label: "Explore" },
-    { icon: <Video size={26} />, label: "Reels" },
-    { icon: <MessageSquare size={26} />, label: "Messages" },
-    { icon: <Bell size={26} />, label: "Notifications" },
-    { icon: <PlusSquare size={26} />, label: "Create" },
-    { icon: <User size={26} />, label: "Profile" },
+    { icon: <Home size={26} />, label: "Home", route: "/" },
+    { icon: <Search size={26} />, label: "Search", route: "/search" },
+    { icon: <Compass size={26} />, label: "Explore", route: "/explore" },
+    { icon: <Video size={26} />, label: "Reels", route: "/reels" },
+    { icon: <MessageSquare size={26} />, label: "Messages", route: "/messages" },
+    { icon: <Bell size={26} />, label: "Notifications", route: "/notifications" },
+    { icon: <PlusSquare size={26} />, label: "Create", route: "/create" },
+    { icon: <User size={26} />, label: "Profile", route: `/profile/${username}` },
   ];
 
-  React.useEffect(() => {
-  if(theme === "dark") {
-    setIsDark(true);
-  } else {
-    setIsDark(false);
-  }
-}, [theme]);
+//   React.useEffect(() => {
+//   if(theme === "dark") {
+//     setIsDark(true);
+//   } else {
+//     setIsDark(false);
+//   }
+// }, [theme]);
 
   return (
     <div className={`fixed left-0 top-0 h-screen w-[72px] lg:w-[244px] border-r flex flex-col items-center dark:bg-black dark:border-gray-800 bg-gray-50 border-gray-200 lg:items-stretch transition-all duration-300 z-50`}
@@ -38,18 +40,19 @@ const Sidebar = ({ page }) => {
         <h1 className={`font-bold text-4xl ababeelFont bg-gradient-to-r from-[#3CB7C4] to-[#2A3B8F] bg-clip-text text-transparent`}
         // style={{color: isDark ? 'white' : 'black', borderColor: isDark ? '#1e2939' : '#e5e7eb'}}
         >
-          &nbsp;{isDark ? 'Ababeel' : 'Ababeel'}
+          &nbsp;{'Ababeel'}
         </h1>
       </div>
       <div className="pt-6 lg:hidden">
-        <Menu size={28} className={`${isDark ? 'text-white' : 'text-black'} dark:text-white text-black`} />
+        <Menu size={28} className={`dark:text-white text-black`} />
       </div>
 
       {/* Menu Items */}
       <nav className="flex-1 px-3 lg:px-4">
         {menu.map((item, i) => (
-          <div
+          <Link
             key={i}
+            href={item.route}
             className={`flex items-center gap-4 px-3 py-3 rounded-xl mb-1 cursor-pointer transition-all
               ${page === item.label 
                 ? 'dark:bg-gray-900 dark:text-white dark:font-semibold bg-gray-100 text-black font-semibold'
@@ -62,7 +65,7 @@ const Sidebar = ({ page }) => {
             <span className="hidden lg:block text-[15px] font-medium">
               {item.label}
             </span>
-          </div>
+          </Link>
         ))}
       </nav>
 
