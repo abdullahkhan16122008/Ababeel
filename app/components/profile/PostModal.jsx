@@ -4,7 +4,7 @@
 import axios, { all } from 'axios';
 import { X, Heart, MessageCircle, Send, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 
 export default function PostModal({
   initialPost,
@@ -21,6 +21,9 @@ export default function PostModal({
   const [likeUsers, setLikeUsers] = useState(initialPost.likes || []);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
+  let [username, setUsername] = useState('');
+  let [profilePicture, setProfilePicture] = useState('');
+
 
   const videoRef = useRef(null);
   const clickTimeout = useRef(null);
@@ -37,10 +40,13 @@ export default function PostModal({
       console.log("Error fetching comments:", error);
     }
   };
-
-    // let id = localStorage.getItem("id").toString();
-  let username = localStorage.getItem("username");
-  let profilePicture = localStorage.getItem("profilePicture").toString();
+useEffect(() => {
+  // let id = localStorage.getItem("id").toString();
+  let storedUsername = localStorage.getItem("username");
+  let storedProfilePicture = localStorage.getItem("profilePicture");
+  setUsername(storedUsername);
+  setProfilePicture(storedProfilePicture);
+}, []);
 
 
   let getLikes = async () => {
@@ -143,7 +149,7 @@ export default function PostModal({
       let res = await axios.post(`${api}/api/comment/post`, {
         postId: currentPost._id,
         username: username,
-        profilePicture: ( profilePicture === undefined || profilePicture === "undefined" || profilePicture === "null" ) ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ETHj25I6ZphEu_NiXJIT42IDcuCHNVy5CnAc7mKQxA&s" : profilePicture,
+        profilePicture: (profilePicture === undefined || profilePicture === "undefined" || profilePicture === "null") ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ETHj25I6ZphEu_NiXJIT42IDcuCHNVy5CnAc7mKQxA&s" : profilePicture,
         text: comment
       });
 
@@ -164,7 +170,7 @@ export default function PostModal({
       let res = await axios.post(`${api}/api/like/post`, {
         postId: currentPost._id,
         username: username,
-        profilePicture: (profilePicture === undefined || profilePicture === "undefined" || profilePicture === "null" ) ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ETHj25I6ZphEu_NiXJIT42IDcuCHNVy5CnAc7mKQxA&s" : profilePicture
+        profilePicture: (profilePicture === undefined || profilePicture === "undefined" || profilePicture === "null") ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ETHj25I6ZphEu_NiXJIT42IDcuCHNVy5CnAc7mKQxA&s" : profilePicture
       });
 
       if (res.data) {
