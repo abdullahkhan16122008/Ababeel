@@ -30,21 +30,19 @@ const Sidebar = ({ page }) => {
 }, [theme]);
 
   return (
-    <div className={`fixed left-0 top-0 h-screen w-[72px] lg:w-[244px] border-r 
-      ${isDark ? 'bg-black border-gray-800' : 'bg-gray-50 border-gray-200'} 
-      flex flex-col items-center lg:items-stretch transition-all duration-300 z-50`}
+    <div className={`fixed left-0 top-0 h-screen w-[72px] lg:w-[244px] border-r flex flex-col items-center dark:bg-black dark:border-gray-800 bg-gray-50 border-gray-200 lg:items-stretch transition-all duration-300 z-50`}
     //   style={{backgroundColor: isDark ? 'black' : 'white', borderColor: isDark ? '#1e2939' : '#e5e7eb'}}
     >
       {/* Logo */}
       <div className="pt-6 pb-8 px-6 hidden lg:block">
-        <h1 className={`font-bold text-4xl ababeelFont ${isDark ? 'text-white' : 'text-black'}`}
+        <h1 className={`font-bold text-4xl ababeelFont bg-gradient-to-r from-[#3CB7C4] to-[#2A3B8F] bg-clip-text text-transparent`}
         // style={{color: isDark ? 'white' : 'black', borderColor: isDark ? '#1e2939' : '#e5e7eb'}}
         >
-          {isDark ? 'Ababeel' : 'Ababeel'}
+          &nbsp;{isDark ? 'Ababeel' : 'Ababeel'}
         </h1>
       </div>
       <div className="pt-6 lg:hidden">
-        <Menu size={28} className={isDark ? 'text-white' : 'text-black'} />
+        <Menu size={28} className={`${isDark ? 'text-white' : 'text-black'} dark:text-white text-black`} />
       </div>
 
       {/* Menu Items */}
@@ -54,12 +52,8 @@ const Sidebar = ({ page }) => {
             key={i}
             className={`flex items-center gap-4 px-3 py-3 rounded-xl mb-1 cursor-pointer transition-all
               ${page === item.label 
-                ? isDark 
-                  ? 'bg-gray-900 text-white font-semibold' 
-                  : 'bg-gray-100 text-black font-semibold'
-                : isDark 
-                  ? 'hover:bg-gray-900 text-gray-400 hover:text-white' 
-                  : 'hover:bg-gray-100 text-gray-700 hover:text-black'
+                ? 'dark:bg-gray-900 dark:text-white dark:font-semibold bg-gray-100 text-black font-semibold'
+                : 'dark:hover:bg-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 text-gray-700 hover:text-black'
               }`}
           >
             <div className="w-7 h-7 flex items-center justify-center">
@@ -73,12 +67,11 @@ const Sidebar = ({ page }) => {
       </nav>
 
       {/* Bottom More Button (Optional - Instagram jaisa) */}
-      <div className="p-4 border-t border-gray-300 hidden lg:block">
-        <div className={`flex items-center gap-4 px-3 py-3 rounded-xl cursor-pointer
-          ${isDark ? 'hover:bg-gray-900' : 'hover:bg-gray-100'}`}
+      <div className={`p-4 border-t dark:border-gray-700 border-gray-300 hidden lg:block`}>
+        <div className={`flex items-center gap-4 px-3 py-3 rounded-xl cursor-pointer dark:hover:bg-gray-900 hover:bg-gray-100`}
         >
           <Menu size={26} />
-          <span className={`${isDark ? 'text-gray-400' : 'text-gray-700'} hidden lg:block font-medium`}>
+          <span className={`dark:text-gray-400 text-gray-700 hidden lg:block font-medium`}>
             More
           </span>
         </div>
