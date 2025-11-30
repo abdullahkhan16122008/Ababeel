@@ -23,11 +23,13 @@ const Login = () => {
             if (res.data) {
                 alert(res.data.message)
                 if (res.data.success === true) {
-                    router.push('/login');
+                    // router.push('/login');
+                    if (typeof window !== "undefined") {
                     localStorage.setItem('userData', JSON.stringify(res.data.user));
                     localStorage.setItem('id', res.data.user.id);
                     localStorage.setItem('username', res.data.user.username);
                     localStorage.setItem('profilePicture', res.data.user.profilePicture);
+                    }
                     router.push('/');
                 }
             } else {
