@@ -78,9 +78,9 @@ export default function HomePage() {
                         <div className='text-left'>
                         <button
                             onClick={scrollLeft}
-                            className="absolute top-[60px] -translate-x-[16px] z-50 bg-white/80 dark:bg-black/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-900 rounded-full p-2 shadow-lg transition-all"
+                            className="absolute top-[60px] -translate-x-[16px] z-50 dark:bg-white/80 bg-black/80 backdrop-blur-sm dark:hover:bg-white hover:bg-gray-900 rounded-full p-2 shadow-lg transition-all"
                         >
-                            <ChevronLeft size={24} className="text-gray-800 dark:text-white" />
+                            <ChevronLeft size={24} className="dark:text-gray-800 text-white" />
                         </button>
                         </div>
                     )}
@@ -122,9 +122,9 @@ export default function HomePage() {
                         <div className='text-right'>
                         <button
                             onClick={scrollRight}
-                            className="absolute top-[60px] -translate-x-[16px] z-50 bg-white/80 dark:bg-black/80 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-900 rounded-full p-2 shadow-lg transition-all"
+                            className="absolute top-[60px] -translate-x-[16px] z-50 dark:bg-white/80 bg-black/80 backdrop-blur-sm dark:hover:bg-white hover:bg-gray-900 rounded-full p-2 shadow-lg transition-all"
                         >
-                            <ChevronRight size={24} className="text-gray-800 dark:text-white" />
+                            <ChevronRight size={24} className="dark:text-gray-800 text-white" />
                         </button>
                             </div>
                     )}

@@ -10,7 +10,12 @@ import Link from 'next/link';
 const Sidebar = ({ page }) => {
   // const { theme } = useAppContext(); // theme ko use kar rahe hain
   // let [isDark, setIsDark] = React.useState(false);
-  let username = localStorage.getItem('username');
+let [username, setUsername] = React.useState("");
+
+React.useEffect(() => {
+  const storedUser = localStorage.getItem("username");
+  setUsername(storedUser);
+}, []);
 
   const menu = [
     { icon: <Home size={26} />, label: "Home", route: "/" },
