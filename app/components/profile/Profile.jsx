@@ -15,6 +15,7 @@ const Profile = () => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [activeTab, setActiveTab] = useState("posts");
   let [editProfile, setEditProfile] = useState(false);
+  let [username, setUsername] = useState('');
   const [selectedFile, setSelectedFile] = useState(userData.profilePicture)
   const [editForm, setEditForm] = useState({
     username: userData.username || '',
@@ -148,8 +149,10 @@ const Profile = () => {
 
   };
 
-  let username = localStorage.getItem('username');
-
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("username");
+    setUsername(storedUser);
+  }, []);
 
   return (
     <>
@@ -177,7 +180,7 @@ const Profile = () => {
                   Edit Profile
                 </button> : <button className="px-6 py-2 bg-[#2A3B8F] hover:bg-[#3CB7C4] rounded-lg font-medium text-white">
                   Follow
-                </button> }
+                </button>}
               </div>
               <div className="mt-6 flex gap-10 justify-center md:justify-start text-lg">
                 <div><strong>{postsData.length}</strong> posts</div>
