@@ -25,7 +25,7 @@ React.useEffect(() => {
     { icon: <MessageSquare size={26} />, label: "Messages", route: "/messages" },
     { icon: <Bell size={26} />, label: "Notifications", route: "/notifications" },
     { icon: <PlusSquare size={26} />, label: "Create", route: "/create" },
-    { icon: <User size={26} />, label: "Profile", route: `/profile/${username}` },
+    { icon: <User size={26} />, label: "Profile", route: username ? `/profile/${username}` : "/profile" },
   ];
 
 //   React.useEffect(() => {
