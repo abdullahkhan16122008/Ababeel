@@ -9,11 +9,15 @@ import {
   Heart, MessageCircle, Send, Bookmark, MoreHorizontal,
   Play, ChevronLeft, ChevronRight, Volume2, VolumeX
 } from "lucide-react";
+import Link from "next/link";
 
 export default function HomePage() {
   const scrollRef = useRef(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [username, setUsername] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
+  const [name, setName] = useState('');
   const [posts, setPosts] = useState([]);
 
   const api = process.env.NEXT_PUBLIC_BASE_URL;
@@ -31,11 +35,22 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchPost();
+    let storedUser = '';
+    let storedPicture = '';
+    let storedName = '';
+    if (typeof window !== "undefined") {
+      storedUser = localStorage.getItem("username");
+      storedPicture = localStorage.getItem("profilePicture");
+      setUsername(storedUser);
+      setProfilePicture(storedPicture);
+      storedName = localStorage.getItem("name");
+      setName(storedName);
+    }
   }, []);
 
   // Stories (dummy)
   const stories = [
-    { id: 1, username: "your_story", isYour: true },
+    { id: 1, username: username },
     { id: 2, username: "ali_khan" },
     { id: 3, username: "sara_art" },
     { id: 4, username: "hamza_reels" },
@@ -89,14 +104,14 @@ export default function HomePage() {
                 <div key={story.id} className="flex-shrink-0 text-center group">
                   <div
                     className={`w-16 h-16 rounded-full p-[3px] transition-all cursor-pointer ${
-                      story.isYour
+                      story.username === username
                         ? "ring-2 ring-gray-400 ring-offset-2 ring-offset-transparent"
                         : "bg-gradient-to-tr from-[#2A3B8F] to-[#3CB7C4]"
                     }`}
                   >
                     <div className="w-full h-full rounded-full bg-white dark:bg-black p-[2px]">
                       <div className="w-full h-full rounded-full bg-gray-300 flex items-center justify-center">
-                        {story.isYour ? (
+                        {story.username === username ? (
                           <span className="text-3xl text-blue-500 font-bold">+</span>
                         ) : (
                           <div className="w-full h-full rounded-full bg-gray-400" />
@@ -105,7 +120,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <p className="text-xs mt-2 w-20 truncate">
-                    {story.isYour ? "Your story" : story.username}
+                    {story.username === username ? "Your story" : story.username}
                   </p>
                 </div>
               ))}
@@ -137,12 +152,12 @@ export default function HomePage() {
               <div className="flex items-center gap-3">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 p-0.5">
                   <div className="w-full h-full rounded-full bg-white dark:bg-black p-0.5">
-                    <div className="w-full h-full rounded-full bg-gray-400" />
+                    <img src={profilePicture !== (undefined || null || '') ? profilePicture : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ETHj25I6ZphEu_NiXJIT42IDcuCHNVy5CnAc7mKQxA&s"} alt="Profile Picture" className="w-full h-full rounded-full bg-gray-400" width={100} height={100} />
                   </div>
                 </div>
                 <div>
-                  <p className="font-semibold">your_username</p>
-                  <p className="text-sm text-gray-500">Your Name</p>
+                  <p className="font-semibold">{username}</p>
+                  <p className="text-sm text-gray-500">{name}</p>
                 </div>
               </div>
               <button className="text-xs font-semibold text-blue-500">Switch</button>
@@ -262,7 +277,7 @@ function PostCard({ post }) {
       {/* Header */}
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-yellow-500 p-0.5">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#2A3B8F] to-[#3CB7C4] p-0.5">
             <div className="w-full h-full rounded-full bg-white dark:bg-black p-0.5">
               <Image
                 src={post.profilePicture || "/default-avatar.png"}
@@ -354,6 +369,9 @@ function PostCard({ post }) {
         <p className="text-sm mt-2">
           <span className="font-semibold mr-2">{post.username}</span>
           {post.caption}
+          {post.hashtags.map((tag) => (
+            <Link key={tag} href={``} className="text-blue-500 mr-1"> {tag} </Link>
+          ))}
         </p>
 
         <button className="text-sm text-gray-500 mt-2 block">
