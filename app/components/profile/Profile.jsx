@@ -150,8 +150,10 @@ const Profile = () => {
   };
 
   React.useEffect(() => {
-    const storedUser = localStorage.getItem("username");
-    setUsername(storedUser);
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("username");
+      setUsername(storedUser);
+    }
   }, []);
 
   return (

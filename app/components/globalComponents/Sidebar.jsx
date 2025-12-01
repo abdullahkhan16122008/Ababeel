@@ -13,8 +13,10 @@ const Sidebar = ({ page }) => {
 let [username, setUsername] = React.useState("");
 
 React.useEffect(() => {
-  const storedUser = localStorage.getItem("username");
-  setUsername(storedUser);
+  if (typeof window !== "undefined") {
+    const storedUser = localStorage.getItem("username");
+    setUsername(storedUser);
+  }
 }, []);
 
   const menu = [

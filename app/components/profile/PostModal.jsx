@@ -42,10 +42,12 @@ export default function PostModal({
   };
 useEffect(() => {
   // let id = localStorage.getItem("id").toString();
-  let storedUsername = localStorage.getItem("username");
-  let storedProfilePicture = localStorage.getItem("profilePicture");
-  setUsername(storedUsername);
-  setProfilePicture(storedProfilePicture);
+  if (typeof window !== "undefined") {
+    let storedUsername = localStorage.getItem("username");
+    let storedProfilePicture = localStorage.getItem("profilePicture");
+    setUsername(storedUsername);
+    setProfilePicture(storedProfilePicture);
+  }
 }, []);
 
 
