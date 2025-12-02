@@ -39,7 +39,7 @@ React.useEffect(() => {
 // }, [theme]);
 
   return (
-    <div className={`fixed left-0 top-0 h-screen w-[72px] lg:w-[244px] border-r flex flex-col items-center dark:bg-black dark:border-gray-800 bg-gray-50 border-gray-200 lg:items-stretch transition-all duration-300 z-50`}
+    <div className={`fixed left-0 top-0 h-screen w-[72px] lg:w-[244px] border-r flex flex-col items-center dark:bg-black dark:border-gray-800 bg-gray-50 border-gray-200 lg:items-stretch transition-all duration-300 z-50 overflow-hidden`}
     //   style={{backgroundColor: isDark ? 'black' : 'white', borderColor: isDark ? '#1e2939' : '#e5e7eb'}}
     >
       {/* Logo */}
