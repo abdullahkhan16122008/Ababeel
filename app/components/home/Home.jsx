@@ -10,6 +10,7 @@ import {
   Play, ChevronLeft, ChevronRight, Volume2, VolumeX
 } from "lucide-react";
 import Link from "next/link";
+import { useAppContext } from "@/app/ContextApi/Context";
 
 export default function HomePage() {
   const scrollRef = useRef(null);
@@ -201,9 +202,9 @@ export default function HomePage() {
 function PostCard({ post }) {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
   const [showHeart, setShowHeart] = useState(false);
   const clickTimeout = useRef(null);
+  const { isMuted, setIsMuted } = useAppContext();
 
   // Autoplay when 50% visible
   useEffect(() => {

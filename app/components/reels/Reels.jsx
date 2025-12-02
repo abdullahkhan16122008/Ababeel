@@ -7,6 +7,7 @@ import {
   Heart, MessageCircle, Send, Bookmark,
   Volume2, VolumeX, MoreHorizontal
 } from "lucide-react";
+import { useAppContext } from "@/app/ContextApi/Context";
 
 export default function ReelsPage() {
   const [reels, setReels] = useState([]);
@@ -17,7 +18,7 @@ export default function ReelsPage() {
 
   const fetchReels = async () => {
     try {
-      const res = await axios.post(`${api}/api/get/reels`); // ← your backend route
+      const res = await axios.post(`${api}/api/get/reels`);
       if (res.data?.reels) {
         setReels(res.data.reels);
       }
@@ -25,11 +26,12 @@ export default function ReelsPage() {
       console.error("Failed to load reels", err);
     }
   };
+
   useEffect(() => {
     fetchReels();
   }, []);
 
-  // Auto-play current reel when index changes
+  // Auto-play active reel
   useEffect(() => {
     if (reels.length === 0) return;
     const videos = containerRef.current?.querySelectorAll("video");
@@ -43,12 +45,12 @@ export default function ReelsPage() {
     });
   }, [currentIndex, reels]);
 
-  // Touch/Swipe + Mouse Wheel Support
+  // Touch Swipe + Mouse Wheel
   useEffect(() => {
     let touchStartY = 0;
     let wheelTimeout;
 
-    const handleTouchStart = (e) => touchStartY = e.touches[0].clientY;
+    const handleTouchStart = (e) => (touchStartY = e.touches[0].clientY);
     const handleTouchEnd = (e) => {
       const touchEndY = e.changedTouches[0].clientY;
       const diff = touchStartY - touchEndY;
@@ -73,7 +75,7 @@ export default function ReelsPage() {
     };
 
     const container = containerRef.current;
-    container?.addEventListener("touchstart", handleTouchStart);
+    container?.addEventListener("touchstart", handleTouchStart, { passive: true });
     container?.addEventListener("touchend", handleTouchEnd);
     container?.addEventListener("wheel", handleWheel, { passive: true });
 
@@ -84,19 +86,39 @@ export default function ReelsPage() {
     };
   }, [currentIndex, reels.length]);
 
+  // NEW: Keyboard Arrow Up/Down + Space Support
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowDown" || e.key === " ") {
+        e.preventDefault();
+        if (currentIndex < reels.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        }
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          setCurrentIndex(prev => prev - 1);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, reels.length]);
+
   if (reels.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black text-white">
-        <p className="text-xl">No reels yet. Be the first to post!</p>
+      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-black text-white">
+        {/* <p className="text-xl">No reels yet. Be the first to post!</p> */}
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="fixed inset-0 bg-black overflow-hidden">
-      {/* Reels Container */}
+    <div ref={containerRef} className="fixed inset-0 bg-gray-50 dark:bg-black overflow-hidden">
+      {/* Reels Container - Full Screen & Responsive */}
       <div
-        className="h-full flex flex-col w-[500px] justify-self-center transition-transform duration-300 ease-out"
+        className="h-screen w-full max-w-[500px] mx-auto flex flex-col transition-transform duration-300 ease-out"
         style={{ transform: `translateY(-${currentIndex * 100}vh)` }}
       >
         {reels.map((reel, index) => (
@@ -104,28 +126,49 @@ export default function ReelsPage() {
         ))}
       </div>
 
-      {/* Top Bar */}
-      <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center text-white">
+      {/*
+      <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center text-white pointer-events-none">
         <h1 className="text-2xl font-bold tracking-wider">Reels</h1>
-        <button className="p-2">
+        <button className="p-2 pointer-events-auto">
           <svg className="w-7 h-7" fill="white" viewBox="0 0 24 24">
             <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM10 17l5-5-5-5v10z" />
           </svg>
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }
 
-// Single Reel Component
+// Single Reel Item (Full Responsive + Mobile Friendly)
 function ReelItem({ reel, isActive }) {
   const videoRef = useRef(null);
-  const [isMuted, setIsMuted] = useState(false);
+  const { reelMuted, setReelMuted } = useAppContext();
   const [isLiked, setIsLiked] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const clickTimeout = useRef(null);
 
-  // Mute/Unmute + Play/Pause + Double Tap Like
+  let api = process.env.NEXT_PUBLIC_BASE_URL;
+
+  let username;
+  let profilePicture;
+  useEffect(() => {
+    username = localStorage.getItem("username");
+    profilePicture = localStorage.getItem("profilePicture");
+  }, [reel]);
+
+  let handleLike = async () => {
+    try {
+      const res = await axios.post(`${api}/api/like/post`, { postId: reel._id, username, profilePicture });
+      if (res.data?.success) {
+        setIsLiked(true);
+        reel.likes = res.data.likes;
+      }
+    } catch (error) {
+      console.error("Error liking reel:", error);
+    }
+  };
+
+
   const handleVideoClick = () => {
     if (!videoRef.current) return;
 
@@ -133,13 +176,13 @@ function ReelItem({ reel, isActive }) {
       clearTimeout(clickTimeout.current);
       clickTimeout.current = null;
       // Double tap = Like
-      setIsLiked(true);
+      handleLike();
       setShowHeart(true);
       setTimeout(() => setShowHeart(false), 1000);
     } else {
       clickTimeout.current = setTimeout(() => {
         clickTimeout.current = null;
-        // Single tap = Pause/Play
+        // Single tap = Play/Pause
         if (videoRef.current.paused) {
           videoRef.current.play();
         } else {
@@ -153,20 +196,20 @@ function ReelItem({ reel, isActive }) {
     e.stopPropagation();
     if (videoRef.current) {
       videoRef.current.muted = !videoRef.current.muted;
-      setIsMuted(videoRef.current.muted);
+      setReelMuted(videoRef.current.muted);
     }
   };
 
   return (
-    <div className="relative h-screen w-full justify-items-center flex-shrink-0 snap-start">
-      {/* Video */}
+    <div className="relative h-screen w-full flex-shrink-0 snap-start">
+      {/* Full Screen Video */}
       <video
         ref={videoRef}
         src={reel.mediaUrl}
-        className="w-[500px] h-full object-cover"
+        className="w-full h-full object-cover"
         loop
         playsInline
-        muted={isMuted}
+        muted={reelMuted}
         autoPlay={isActive}
         onClick={handleVideoClick}
       />
@@ -174,15 +217,15 @@ function ReelItem({ reel, isActive }) {
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
 
-      {/* Double Tap Heart */}
+      {/* Double Tap Heart Animation */}
       {showHeart && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
           <Heart size={100} className="text-white fill-white animate-ping" />
         </div>
       )}
 
-      {/* Bottom Info */}
-      <div className="absolute bottom-20 left-4 right-16 text-white">
+      {/* Bottom Caption & User Info */}
+      <div className="absolute bottom-16 left-4 right-16 text-white z-10">
         <div className="flex items-center gap-3 mb-2">
           <Image
             src={reel.profilePicture || "/default-avatar.png"}
@@ -207,15 +250,12 @@ function ReelItem({ reel, isActive }) {
         )}
       </div>
 
-      {/* Right Action Buttons */}
-      <div className="absolute right-3 bottom-20 flex flex-col gap-6 text-white">
-        <button
-          onClick={() => setIsLiked(!isLiked)}
-          className="flex flex-col items-center gap-1"
-        >
+      {/* Right Side Action Buttons */}
+      <div className="absolute cursor-pointer right-3 bottom-20 flex flex-col gap-6 text-white z-10">
+        <button onClick={() => handleLike()} className="flex flex-col items-center gap-1">
           <Heart
             size={34}
-            className={`transition-all ${isLiked ? "fill-red-500 text-red-500 scale-125" : ""}`}
+            className={`transition-all ${isLiked ? "fill-red-500 text-red-500 scale-125" : "text-white"}`}
           />
           <span className="text-xs">{(reel.likes?.length || 0) + (isLiked ? 1 : 0)}</span>
         </button>
@@ -236,14 +276,14 @@ function ReelItem({ reel, isActive }) {
         </button>
 
         <button onClick={toggleMute} className="mt-4">
-          {isMuted ? <VolumeX size={30} /> : <Volume2 size={30} />}
+          {reelMuted ? <VolumeX size={30} /> : <Volume2 size={30} />}
         </button>
 
         <button className="mt-2">
           <MoreHorizontal size={30} />
         </button>
 
-        {/* Profile Picture */}
+        {/* Small Profile Pic with + */}
         <div className="mt-4">
           <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden">
             <Image
@@ -254,7 +294,7 @@ function ReelItem({ reel, isActive }) {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="w-5 h-5 bg-blue-500 rounded-full border-2 border-white -mt-4 ml-8 flex items-center justify-center">
+          <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white -mt-5 ml-9 flex items-center justify-center">
             <span className="text-white text-xs font-bold">+</span>
           </div>
         </div>

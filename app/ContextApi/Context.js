@@ -6,6 +6,8 @@ const AppContext = createContext();
 
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [reelMuted, setReelMuted] = useState(false);
 
   // Dark mode state
   const [theme, setTheme] = useState("light");
@@ -39,7 +41,7 @@ export function AppProvider({ children }) {
   };
 
   return (
-    <AppContext.Provider value={{ user, setUser, theme, setTheme, toggleTheme }}>
+    <AppContext.Provider value={{ user, setUser, theme, setTheme, toggleTheme, isMuted, setIsMuted, reelMuted, setReelMuted }}>
       {children}
     </AppContext.Provider>
   );
