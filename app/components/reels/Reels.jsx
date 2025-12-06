@@ -2,12 +2,13 @@
 
 import axios from "axios";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import {
   Heart, MessageCircle, Send, Bookmark,
   Volume2, VolumeX, MoreHorizontal
 } from "lucide-react";
 import { useAppContext } from "@/app/ContextApi/Context";
+import CommentsSection from "./CommentSection";
 
 export default function ReelsPage() {
   const [reels, setReels] = useState([]);
@@ -37,7 +38,7 @@ export default function ReelsPage() {
     const videos = containerRef.current?.querySelectorAll("video");
     videos?.forEach((video, i) => {
       if (i === currentIndex) {
-        video.play().catch(() => {});
+        video.play().catch(() => { });
       } else {
         video.pause();
         video.currentTime = 0;
@@ -145,50 +146,83 @@ function ReelItem({ reel, isActive }) {
   const { reelMuted, setReelMuted } = useAppContext();
   const [isLiked, setIsLiked] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const clickTimeout = useRef(null);
 
   let api = process.env.NEXT_PUBLIC_BASE_URL;
+  let username = "";
+  let profilePicture = "";
 
-  let username;
-  let profilePicture;
+  // Get current user from localStorage
   useEffect(() => {
-    username = localStorage.getItem("username");
-    profilePicture = localStorage.getItem("profilePicture");
+    username = localStorage.getItem("username") || "";
+    profilePicture = localStorage.getItem("profilePicture") || "";
+
+    // Check if already liked
+    const alreadyLiked = reel.likes?.some(like => like.username === username);
+    setIsLiked(alreadyLiked);
   }, [reel]);
 
-  let handleLike = async () => {
+  // Close comments automatically when reel changes (swipe)
+  useEffect(() => {
+    if (!isActive && isCommentsOpen) {
+      setIsCommentsOpen(false);
+    }
+  }, [isActive, isCommentsOpen]);
+
+  const handleLike = async () => {
+    if (!username) return;
+
     try {
-      const res = await axios.post(`${api}/api/like/post`, { postId: reel._id, username, profilePicture });
-      if (res.data?.success) {
-        setIsLiked(true);
-        reel.likes = res.data.likes;
+      if (isLiked) {
+        // Dislike
+        const res = await axios.post(`${api}/api/dislike/post`, {
+          postId: reel._id,
+          username,
+          profilePicture
+        });
+        if (res.data?.success) {
+          setIsLiked(false);
+          reel.likes = res.data.likes;
+        }
+      } else {
+        // Like
+        const res = await axios.post(`${api}/api/like/post`, {
+          postId: reel._id,
+          username,
+          profilePicture
+        });
+        if (res.data?.success) {
+          setIsLiked(true);
+          reel.likes = res.data.likes;
+          setShowHeart(true);
+          setTimeout(() => setShowHeart(false), 1000);
+        }
       }
     } catch (error) {
-      console.error("Error liking reel:", error);
+      console.error("Like error:", error);
     }
   };
 
-
-  const handleVideoClick = () => {
-    if (!videoRef.current) return;
+  const handleVideoClick = (e) => {
+    // Prevent click when tapping on buttons or comments
+    if (e.target.closest("button") || e.target.closest("[data-comments-section]")) return;
 
     if (clickTimeout.current) {
       clearTimeout(clickTimeout.current);
       clickTimeout.current = null;
-      // Double tap = Like
+      // Double tap → Like
       handleLike();
-      setShowHeart(true);
-      setTimeout(() => setShowHeart(false), 1000);
     } else {
       clickTimeout.current = setTimeout(() => {
         clickTimeout.current = null;
-        // Single tap = Play/Pause
+        // Single tap → Play/Pause
         if (videoRef.current.paused) {
-          videoRef.current.play();
+          videoRef.current.play().catch(() => {});
         } else {
           videoRef.current.pause();
         }
-      }, 300);
+      }, 250);
     }
   };
 
@@ -200,33 +234,43 @@ function ReelItem({ reel, isActive }) {
     }
   };
 
+  // Close comments when clicking outside (on video or black area)
+  const closeCommentsOnOutsideClick = (e) => {
+    if (isCommentsOpen && !e.target.closest("[data-comments-section]")) {
+      setIsCommentsOpen(false);
+    }
+  };
+
   return (
-    <div className="relative h-screen w-full flex-shrink-0 snap-start">
-      {/* Full Screen Video */}
+    <div className="relative h-screen w-full flex-shrink-0 snap-start bg-black">
+      {/* Main Video */}
       <video
         ref={videoRef}
         src={reel.mediaUrl}
         className="w-full h-full object-cover"
         loop
         playsInline
-        muted={reelMuted}
+        muted={reelMuted} 
         autoPlay={isActive}
-        onClick={handleVideoClick}
+        onClick={(e) => {
+          handleVideoClick(e);
+          closeCommentsOnOutsideClick(e);
+        }}
       />
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none" />
+      {/* Dark Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
 
-      {/* Double Tap Heart Animation */}
+      {/* Big Heart on Double Tap */}
       {showHeart && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
           <Heart size={100} className="text-white fill-white animate-ping" />
         </div>
       )}
 
-      {/* Bottom Caption & User Info */}
-      <div className="absolute bottom-16 left-4 right-16 text-white z-10">
-        <div className="flex items-center gap-3 mb-2">
+      {/* Bottom: User Info + Caption */}
+      <div className="absolute bottom-20 left-4 right-16 text-white z-20">
+        <div className="flex items-center gap-3 mb-3">
           <Image
             src={reel.profilePicture || "/default-avatar.png"}
             width={40}
@@ -234,14 +278,14 @@ function ReelItem({ reel, isActive }) {
             alt={reel.username}
             className="rounded-full ring-2 ring-white"
           />
-          <p className="font-semibold text-lg">{reel.username}</p>
+          <p className="font-bold text-lg">{reel.username}</p>
           <button className="px-4 py-1.5 border border-white rounded-full text-sm font-medium hover:bg-white/20 transition">
             Follow
           </button>
         </div>
-        <p className="text-sm line-clamp-2">{reel.caption}</p>
+        <p className="text-sm leading-relaxed">{reel.caption}</p>
         {reel.music && (
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-3">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 3v10.55a4 4 0 102 3.45V6.5L21 8v8.55a4 4 0 102 3.45V8l-9-2z" />
             </svg>
@@ -250,55 +294,81 @@ function ReelItem({ reel, isActive }) {
         )}
       </div>
 
-      {/* Right Side Action Buttons */}
-      <div className="absolute cursor-pointer right-3 bottom-20 flex flex-col gap-6 text-white z-10">
-        <button onClick={() => handleLike()} className="flex flex-col items-center gap-1">
+      {/* Right Side Buttons */}
+      <div className="absolute right-3 bottom-20 flex flex-col gap-5 text-white z-20">
+        <button onClick={handleLike} className="flex flex-col items-center gap-1">
           <Heart
             size={34}
-            className={`transition-all ${isLiked ? "fill-red-500 text-red-500 scale-125" : "text-white"}`}
+            className={`transition-all duration-200 ${isLiked ? "fill-red-500 text-red-500 scale-110" : ""}`}
           />
-          <span className="text-xs">{(reel.likes?.length || 0) + (isLiked ? 1 : 0)}</span>
+          <span className="text-xs">{reel.likes?.length || 0}</span>
         </button>
 
-        <button className="flex flex-col items-center gap-1">
-          <MessageCircle size={32} />
+        <button
+          onClick={() => setIsCommentsOpen(true)}
+          className="flex flex-col items-center gap-1"
+        >
+          <MessageCircle size={34} className="hover:scale-110 transition" />
           <span className="text-xs">{reel.comments?.length || 0}</span>
         </button>
 
         <button className="flex flex-col items-center gap-1">
-          <Send size={30} />
+          <Send size={32} />
           <span className="text-xs">Share</span>
         </button>
 
         <button className="flex flex-col items-center gap-1">
-          <Bookmark size={30} />
+          <Bookmark size={32} />
           <span className="text-xs">Save</span>
         </button>
 
-        <button onClick={toggleMute} className="mt-4">
-          {reelMuted ? <VolumeX size={30} /> : <Volume2 size={30} />}
+        <button onClick={toggleMute}>
+          {reelMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
         </button>
 
-        <button className="mt-2">
-          <MoreHorizontal size={30} />
+        <button>
+          <MoreHorizontal size={32} />
         </button>
 
-        {/* Small Profile Pic with + */}
-        <div className="mt-4">
+        {/* Small Profile with + */}
+        <div className="mt-4 relative">
           <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden">
             <Image
               src={reel.profilePicture || "/default-avatar.png"}
               width={48}
               height={48}
-              alt={reel.username}
-              className="w-full h-full object-cover"
+              alt=""
+              className="object-cover"
             />
           </div>
-          <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white -mt-5 ml-9 flex items-center justify-center">
+          <div className="absolute bottom-0 right-0 w-6 h-6 bg-blue-600 rounded-full border-2 border-white flex items-center justify-center rounded-full translate-x-1 translate-y-1">
             <span className="text-white text-xs font-bold">+</span>
           </div>
         </div>
       </div>
+
+      {/* Comments Section with Outside Click & Swipe Close */}
+      {isCommentsOpen && (
+        <>
+          {/* Dark Background - Click to Close */}
+          <div
+            className="fixed inset-0 bg-black/90 z-40"
+            onClick={() => setIsCommentsOpen(false)}
+          />
+
+          {/* Actual Comments */}
+          <div
+            data-comments-section // This prevents closing
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-black rounded-t-3xl max-h-[80vh] overflow-hidden"
+          >
+            <CommentsSection
+              reel={reel}
+              isOpen={true}
+              onClose={() => setIsCommentsOpen(false)}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

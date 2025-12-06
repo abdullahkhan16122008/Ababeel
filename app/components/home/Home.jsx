@@ -23,6 +23,7 @@ export default function HomePage() {
 
   const api = process.env.NEXT_PUBLIC_BASE_URL;
 
+ 
   const fetchPost = async () => {
     try {
       const response = await axios.post(`${api}/api/get/posts`);
@@ -78,124 +79,123 @@ export default function HomePage() {
     setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black dark:text-white text-black">
-      <div className="max-w-screen-2xl mx-auto flex">
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-black dark:text-white text-black">
+        <div className="max-w-screen-2xl mx-auto flex">
 
-        {/* Main Feed */}
-        <div className="w-full lg:w-[630px] px-4 lg:px-0 lg:mx-auto pt-20 lg:pt-6">
+          {/* Main Feed */}
+          <div className="w-full lg:w-[630px] px-2 lg:px-0 lg:mx-auto pt-2 lg:pt-6">
 
-          {/* Stories */}
-          <div className="mb-6 p-4 rounded-xl relative">
-            {showLeftArrow && (
-              <button
-                onClick={scrollLeft}
-                className="absolute left-2 top-[45%] -translate-y-1/2 z-50 cursor-pointer dark:bg-black/70 dark:hover:bg-black/90 bg-gray-200 dark:text-white text-gray-800 rounded-full p-2 shadow-lg transition-all"
+            {/* Stories */}
+            <div className="mb-6 p-4 rounded-xl relative">
+              {showLeftArrow && (
+                <button
+                  onClick={scrollLeft}
+                  className="absolute left-2 top-[45%] -translate-y-1/2 z-50 max-md:hidden cursor-pointer dark:bg-black/70 dark:hover:bg-black/90 bg-gray-200 dark:text-white text-gray-800 rounded-full p-2 shadow-lg transition-all"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+              )}
+
+              <div
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="flex gap-4 overflow-x-auto scrollbar-hide py-4 px-2"
               >
-                <ChevronLeft size={24} />
-              </button>
-            )}
-
-            <div
-              ref={scrollRef}
-              onScroll={handleScroll}
-              className="flex gap-4 overflow-x-auto scrollbar-hide py-4 px-2"
-            >
-              {stories.map((story) => (
-                <div key={story.id} className="flex-shrink-0 text-center group">
-                  <div
-                    className={`w-16 h-16 rounded-full p-[3px] transition-all cursor-pointer ${
-                      story.username === username
+                {stories.map((story) => (
+                  <div key={story.id} className="flex-shrink-0 text-center group">
+                    <div
+                      className={`w-16 h-16 rounded-full p-[3px] transition-all cursor-pointer ${story.username === username
                         ? "ring-2 ring-gray-400 ring-offset-2 ring-offset-transparent"
                         : "bg-gradient-to-tr from-[#2A3B8F] to-[#3CB7C4]"
-                    }`}
-                  >
-                    <div className="w-full h-full rounded-full bg-white dark:bg-black p-[2px]">
-                      <div className="w-full h-full rounded-full bg-gray-300 flex items-center justify-center">
-                        {story.username === username ? (
-                          <span className="text-3xl text-blue-500 font-bold">+</span>
-                        ) : (
-                          <div className="w-full h-full rounded-full bg-gray-400" />
-                        )}
+                        }`}
+                    >
+                      <div className="w-full h-full rounded-full bg-white dark:bg-black p-[2px]">
+                        <div className="w-full h-full rounded-full bg-gray-300 flex items-center justify-center">
+                          {story.username === username ? (
+                            <span className="text-3xl text-blue-500 font-bold">+</span>
+                          ) : (
+                            <div className="w-full h-full rounded-full bg-gray-400" />
+                          )}
+                        </div>
                       </div>
                     </div>
+                    <p className="text-xs mt-2 w-20 truncate">
+                      {story.username === username ? "Your story" : story.username}
+                    </p>
                   </div>
-                  <p className="text-xs mt-2 w-20 truncate">
-                    {story.username === username ? "Your story" : story.username}
-                  </p>
-                </div>
+                ))}
+              </div>
+
+              {showRightArrow && (
+                <button
+                  onClick={scrollRight}
+                  className="absolute right-2 top-[45%] -translate-y-1/2 z-50 max-md:hidden cursor-pointer dark:bg-black/70 dark:hover:bg-black/90 bg-gray-200 dark:text-white text-gray-800 rounded-full p-2 shadow-lg transition-all"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              )}
+            </div>
+
+            {/* Posts Feed */}
+            <div className="space-y-6 max-sm:px-1">
+              {posts.map((post) => (
+                <PostCard key={post.id} post={post} />
               ))}
             </div>
-
-            {showRightArrow && (
-              <button
-                onClick={scrollRight}
-                className="absolute right-2 top-[45%] -translate-y-1/2 z-50 cursor-pointer dark:bg-black/70 dark:hover:bg-black/90 bg-gray-200 dark:text-white text-gray-800 rounded-full p-2 shadow-lg transition-all"
-              >
-                <ChevronRight size={24} />
-              </button>
-            )}
           </div>
 
-          {/* Posts Feed */}
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
-        </div>
-
-        {/* Right Sidebar */}
-        <div className="hidden lg:block w-80 mr-10 mt-6 sticky top-0 h-screen overflow-y-auto">
-          <div className="mt-16">
-            {/* Current User */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 p-0.5">
-                  <div className="w-full h-full rounded-full bg-white dark:bg-black p-0.5">
-                    <img src={profilePicture !== (undefined || null || '') ? profilePicture : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ETHj25I6ZphEu_NiXJIT42IDcuCHNVy5CnAc7mKQxA&s"} alt="Profile Picture" className="w-full h-full rounded-full bg-gray-400" width={100} height={100} />
-                  </div>
-                </div>
-                <div>
-                  <p className="font-semibold">{username}</p>
-                  <p className="text-sm text-gray-500">{name}</p>
-                </div>
-              </div>
-              <button className="text-xs font-semibold text-blue-500">Switch</button>
-            </div>
-
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-500">Suggestions For You</h3>
-              <button className="text-xs font-medium">See All</button>
-            </div>
-
-            <div className="space-y-4">
-              {suggestions.map((user) => (
-                <div key={user.username} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-full bg-gray-300" />
-                    <div>
-                      <p className="font-semibold text-sm">{user.username}</p>
-                      <p className="text-xs text-gray-500">{user.followedBy}</p>
+          {/* Right Sidebar */}
+          <div className="hidden lg:block w-80 mr-10 mt-6 sticky top-0 h-screen overflow-y-auto">
+            <div className="mt-16">
+              {/* Current User */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 p-0.5">
+                    <div className="w-full h-full rounded-full bg-white dark:bg-black p-0.5">
+                      <img src={profilePicture !== (undefined || null || '') ? profilePicture : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ETHj25I6ZphEu_NiXJIT42IDcuCHNVy5CnAc7mKQxA&s"} alt="Profile Picture" className="w-full h-full rounded-full bg-gray-400" width={100} height={100} />
                     </div>
                   </div>
-                  <button className="text-xs font-semibold text-blue-500 hover:text-blue-600">
-                    Follow
-                  </button>
+                  <div>
+                    <p className="font-semibold">{username}</p>
+                    <p className="text-sm text-gray-500">{name}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+                <button className="text-xs font-semibold text-blue-500">Switch</button>
+              </div>
 
-            <div className="mt-10 text-xs text-gray-500 space-y-1">
-              <p>About • Help • Press • API • Jobs • Privacy • Terms</p>
-              <p>Locations • Language • Meta Verified</p>
-              <p className="mt-4">© 2025 ABABEEL FROM PAKISTAN</p>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-500">Suggestions For You</h3>
+                <button className="text-xs font-medium">See All</button>
+              </div>
+
+              <div className="space-y-4">
+                {suggestions.map((user) => (
+                  <div key={user.username} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-gray-300" />
+                      <div>
+                        <p className="font-semibold text-sm">{user.username}</p>
+                        <p className="text-xs text-gray-500">{user.followedBy}</p>
+                      </div>
+                    </div>
+                    <button className="text-xs font-semibold text-blue-500 hover:text-blue-600">
+                      Follow
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-10 text-xs text-gray-500 space-y-1">
+                <p>About • Help • Press • API • Jobs • Privacy • Terms</p>
+                <p>Locations • Language • Meta Verified</p>
+                <p className="mt-4">© 2025 ABABEEL FROM PAKISTAN</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 // ==================== POST CARD WITH FULL REEL FEATURES ====================
@@ -214,7 +214,7 @@ function PostCard({ post }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-          video.play().catch(() => {});
+          video.play().catch(() => { });
           setIsPlaying(true);
         } else {
           video.pause();
@@ -247,7 +247,7 @@ function PostCard({ post }) {
     if (isPlaying) {
       videoRef.current.pause();
     } else {
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play().catch(() => { });
     }
     setIsPlaying(!isPlaying);
   };
@@ -274,9 +274,9 @@ function PostCard({ post }) {
   };
 
   return (
-    <article className="rounded-xl overflow-hidden px-8">
+    <article className="rounded-xl overflow-hidden ml-0 max-md:ml-0 px-8 max-md:px-0 max-lg:px-16 max-lg:ml-10">
       {/* Header */}
-      <div className="flex items-center justify-between p-3">
+      <div className="flex items-center justify-between p-3 max-md:px-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#2A3B8F] to-[#3CB7C4] p-0.5">
             <div className="w-full h-full rounded-full bg-white dark:bg-black p-0.5">
@@ -304,7 +304,7 @@ function PostCard({ post }) {
             <video
               ref={videoRef}
               src={post.mediaUrl}
-              className="w-[75%] max-h-[600px] object-cover cursor-pointer"
+              className="w-[75%] max-h-[600px] min-h-[400px] max-lg:min-h-[900px] max-lg:h-auto max-md:w-full max-md:max-h-[400px] object-cover cursor-pointer"
               loop
               playsInline
               muted={isMuted}
@@ -340,8 +340,8 @@ function PostCard({ post }) {
         ) : (
           <Image
             src={post.mediaUrl}
-            width={600}
-            height={600}
+            width={800}
+            height={800}
             alt="post"
             className=""
           />
